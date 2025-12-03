@@ -2,9 +2,9 @@ import streamlit as st
 from groq import Groq
 import os
 
-# ----------------------------
+# -------------------------------------
 # Load API Key
-# ----------------------------
+# -------------------------------------
 GROQ_API_KEY = st.secrets.get("GROQ_API_KEY", "")
 
 if not GROQ_API_KEY:
@@ -12,26 +12,23 @@ if not GROQ_API_KEY:
 else:
     client = Groq(api_key=GROQ_API_KEY)
 
-# ----------------------------
+# -------------------------------------
 # Streamlit Page Setup
-# ----------------------------
+# -------------------------------------
 st.set_page_config(
-    page_title="Groq ChatGPT",
+    page_title="Simple GEN AI Chatbot",
     layout="centered",
     page_icon="🤖"
 )
 
-# ----------------------------
-# BEAUTIFUL UI (CSS)
-# ----------------------------
+# -------------------------------------
+# UI Styling
+# -------------------------------------
 st.markdown("""
 <style>
     body {
         background: linear-gradient(135deg, #090a0f, #1f2633);
         color: white !important;
-    }
-    .main {
-        background: linear-gradient(135deg, #090a0f, #1f2633);
     }
     .title {
         font-size: 42px;
@@ -48,7 +45,7 @@ st.markdown("""
         margin-top: -10px;
         margin-bottom: 25px;
     }
-    .chat-container {
+    .chat-box {
         background: #12151c;
         padding: 15px;
         border-radius: 15px;
@@ -56,19 +53,19 @@ st.markdown("""
         margin-bottom: 15px;
         box-shadow: 0 0 20px rgba(0, 238, 255, 0.1);
     }
-    .user-msg {
-        color: #fff;
-        padding: 10px;
+    .user {
         background: #1e2a38;
-        border-radius: 10px;
-        margin-bottom: 5px;
-    }
-    .bot-msg {
-        color: #00eaff;
         padding: 10px;
-        background: #0d1117;
         border-radius: 10px;
         margin-bottom: 5px;
+        color: #fff;
+    }
+    .bot {
+        background: #0d1117;
+        padding: 10px;
+        border-radius: 10px;
+        margin-bottom: 5px;
+        color: #00eaff;
         border-left: 3px solid #00eaff;
     }
     .stTextInput>div>div>input {
@@ -80,71 +77,64 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# ----------------------------
+# -------------------------------------
 # Title
-# ----------------------------
+# -------------------------------------
 st.markdown("<div class='title'>Simple GEN AI CHATBOT</div>", unsafe_allow_html=True)
-st.markdown("<div class='sub'>Powered by Llama 3.1 — Fast, Smart, Free</div>", unsafe_allow_html=True)
+st.markdown("<div class='sub'>Powered by Llama 3.1 — Smart, Fast, Free</div>", unsafe_allow_html=True)
 
-# ----------------------------
-# Chat History
-# ----------------------------
+# -------------------------------------
+# Chat History (Limited Memory)
+# -------------------------------------
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Show chat history
-for msg in st.session_state.messages:
-    if msg["role"] == "user":
-        st.markdown(f"<div class='chat-container'><div class='user-msg'>🙋‍♂️ {msg['content']}</div></div>", unsafe_allow_html=True)
+# Display chat history
+for m in st.session_state.messages:
+    if m["role"] == "user":
+        st.markdown(f"<div class='chat-box'><div class='user'>🙋‍♂️ {m['content']}</div></div>", unsafe_allow_html=True)
     else:
-        st.markdown(f"<div class='chat-container'><div class='bot-msg'>🤖 {msg['content']}</div></div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='chat-box'><div class='bot'>🤖 {m['content']}</div></div>", unsafe_allow_html=True)
 
-# ----------------------------
+# -------------------------------------
 # User Input
-# ----------------------------
-user_input = st.text_input("Type your message...", key="input")
+# -------------------------------------
+user_input = st.text_input("Type your message...")
 
-# ----------------------------
-# Groq Chat Function
-# ----------------------------
-def chat_with_groq(text):
-    messages = [{"role": m["role"], "content": m["content"]} for m in st.session_state.messages]
-    messages.append({"role": "user", "content": text})
+# -------------------------------------
+# Limited-memory chat function (BEST)
+# -------------------------------------
+def chat_with_groq(prompt):
+    
+    # KEEP ONLY LAST 4 MESSAGES
+    limited_memory = st.session_state.messages[-4:]
+
+    messages = [{"role": m["role"], "content": m["content"]} for m in limited_memory]
+    messages.append({"role": "user", "content": prompt})
 
     response = client.chat.completions.create(
-        model="llama-3.1-8b-instant",
+        model="mixtral-8x7b-32768",  # best for low rate limits
+        # model="llama-3.3-70b-versatile",  # best quality (optional)
         messages=messages,
         max_tokens=300
     )
 
-    # SAFE extraction for Groq response format
-    try:
-        return response.choices[0].message.content
-    except:
-        # fallback for older versions
-        try:
-            return response.choices[0].message["content"]
-        except:
-            return str(response)
+    return response.choices[0].message.content
 
-# ----------------------------
-# Handle user message
-# ----------------------------
+# -------------------------------------
+# Handle response
+# -------------------------------------
 if user_input:
-    # Add user message
+    # Save user message
     st.session_state.messages.append({"role": "user", "content": user_input})
 
-    # Get chatbot response
     with st.spinner("Thinking..."):
         bot_reply = chat_with_groq(user_input)
 
-    # Add response to history
+    # Save bot reply
     st.session_state.messages.append({"role": "assistant", "content": bot_reply})
 
-    # Rerun to update UI
-    st.rerun()
+    st.rerun()  # refresh chat window
 
 # Footer
-st.markdown("<br><center style='color:#7a7a7a'>Made with ❤️ using Groq + Streamlit</center>", unsafe_allow_html=True)
-
-
+st.markdown("<br><center style='color:#777'>Made with ❤️ using Groq + Streamlit</center>", unsafe_allow_html=True)
