@@ -106,14 +106,13 @@ user_input = st.text_input("Type your message...")
 # -------------------------------------
 def chat_with_groq(prompt):
 
-    # Keep ONLY last 4 messages
     limited_memory = st.session_state.messages[-4:]
 
     messages = [{"role": m["role"], "content": m["content"]} for m in limited_memory]
     messages.append({"role": "user", "content": prompt})
 
     response = client.chat.completions.create(
-        model="llama3-70b-8192",  # CORRECT MODEL
+        model="llama-3.3-70b-versatile",   # FINAL WORKING MODEL
         messages=messages,
         max_tokens=300
     )
@@ -137,3 +136,4 @@ if user_input:
 
 # Footer
 st.markdown("<br><center style='color:#777'>Made with ❤️ using Groq + Streamlit</center>", unsafe_allow_html=True)
+
