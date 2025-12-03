@@ -117,7 +117,15 @@ def chat_with_groq(text):
         max_tokens=300
     )
 
-    return response.choices[0].message["content"]
+    # SAFE extraction for Groq response format
+    try:
+        return response.choices[0].message.content
+    except:
+        # fallback for older versions
+        try:
+            return response.choices[0].message["content"]
+        except:
+            return str(response)
 
 # ----------------------------
 # Handle user message
@@ -138,3 +146,4 @@ if user_input:
 
 # Footer
 st.markdown("<br><center style='color:#7a7a7a'>Made with ❤️ using Groq + Streamlit</center>", unsafe_allow_html=True)
+
