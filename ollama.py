@@ -1,140 +1,140 @@
-# app.py — Beautiful UI version (logic unchanged)
-import os
 import streamlit as st
-from dotenv import load_dotenv
 from groq import Groq
+import os
 
-# Load .env for local use
-load_dotenv()
+# ----------------------------
+# Load API Key
+# ----------------------------
+GROQ_API_KEY = st.secrets.get("GROQ_API_KEY", "")
 
-# --------------------------
-# 🎨 Streamlit Page Config
-# --------------------------
+if not GROQ_API_KEY:
+    st.error("❌ Missing GROQ_API_KEY in Streamlit Secrets")
+else:
+    client = Groq(api_key=GROQ_API_KEY)
+
+# ----------------------------
+# Streamlit Page Setup
+# ----------------------------
 st.set_page_config(
-    page_title="Groq Llama Translator",
-    page_icon="🌐",
-    layout="centered"
+    page_title="Groq ChatGPT",
+    layout="centered",
+    page_icon="🤖"
 )
 
-# --------------------------
-# 🌈 CUSTOM CSS FOR BEAUTIFUL UI
-# --------------------------
+# ----------------------------
+# BEAUTIFUL UI (CSS)
+# ----------------------------
 st.markdown("""
 <style>
+    body {
+        background: linear-gradient(135deg, #090a0f, #1f2633);
+        color: white !important;
+    }
     .main {
         background: linear-gradient(135deg, #090a0f, #1f2633);
-        color: white;
     }
     .title {
         font-size: 42px;
-        font-weight: 800;
-        text-align: center;
+        font-weight: 900;
         color: #00eaff;
+        text-align: center;
+        text-shadow: 0px 0px 20px rgba(0, 238, 255, 0.7);
         margin-bottom: 5px;
-        text-shadow: 0px 0px 20px rgba(0, 238, 255, 0.8);
     }
     .sub {
         text-align: center;
-        color: #b5b5b5;
-        margin-top: -10px;
-        margin-bottom: 30px;
         font-size: 16px;
+        color: #d0d0d0;
+        margin-top: -10px;
+        margin-bottom: 25px;
     }
-    .textbox label {
-        color: #e0e0e0 !important;
-        font-size: 18px;
+    .chat-container {
+        background: #12151c;
+        padding: 15px;
+        border-radius: 15px;
+        border: 1px solid #00eaff60;
+        margin-bottom: 15px;
+        box-shadow: 0 0 20px rgba(0, 238, 255, 0.1);
+    }
+    .user-msg {
+        color: #fff;
+        padding: 10px;
+        background: #1e2a38;
+        border-radius: 10px;
+        margin-bottom: 5px;
+    }
+    .bot-msg {
+        color: #00eaff;
+        padding: 10px;
+        background: #0d1117;
+        border-radius: 10px;
+        margin-bottom: 5px;
+        border-left: 3px solid #00eaff;
     }
     .stTextInput>div>div>input {
         background: #1b1f29;
         color: white;
-        border-radius: 8px;
-    }
-    .output-box {
-        padding: 20px;
-        border-radius: 12px;
-        margin-top: 20px;
-        background: #12151c;
-        border: 1px solid #00eaff50;
-        box-shadow: 0 0 20px rgba(0, 238, 255, 0.2);
-    }
-    .footer {
-        margin-top: 40px;
-        text-align: center;
-        color: #7a7a7a;
-        font-size: 13px;
+        border-radius: 10px;
+        padding: 10px;
     }
 </style>
 """, unsafe_allow_html=True)
 
+# ----------------------------
+# Title
+# ----------------------------
+st.markdown("<div class='title'>Simple GEN AI CHATBOT</div>", unsafe_allow_html=True)
+st.markdown("<div class='sub'>Powered by Llama 3.1 — Fast, Smart, Free</div>", unsafe_allow_html=True)
 
-# --------------------------
-# 🚀 Title Section
-# --------------------------
-st.markdown("<div class='title'>🌐 English → French Translator</div>", unsafe_allow_html=True)
-st.markdown("<div class='sub'>Powered by Groq's ultra-fast Llama models ⚡</div>", unsafe_allow_html=True)
+# ----------------------------
+# Chat History
+# ----------------------------
+if "messages" not in st.session_state:
+    st.session_state.messages = []
 
+# Show chat history
+for msg in st.session_state.messages:
+    if msg["role"] == "user":
+        st.markdown(f"<div class='chat-container'><div class='user-msg'>🙋‍♂️ {msg['content']}</div></div>", unsafe_allow_html=True)
+    else:
+        st.markdown(f"<div class='chat-container'><div class='bot-msg'>🤖 {msg['content']}</div></div>", unsafe_allow_html=True)
 
-# --------------------------
-# 🔐 API KEY LOAD
-# --------------------------
-GROQ_API_KEY = (
-    st.secrets.get("GROQ_API_KEY")
-    if hasattr(st, "secrets")
-    else None
-) or os.getenv("GROQ_API_KEY")
+# ----------------------------
+# User Input
+# ----------------------------
+user_input = st.text_input("Type your message...", key="input")
 
-if not GROQ_API_KEY:
-    st.error("❌ Missing GROQ_API_KEY. Add it in Streamlit Secrets.")
-else:
-    client = Groq(api_key=GROQ_API_KEY)
+# ----------------------------
+# Groq Chat Function
+# ----------------------------
+def chat_with_groq(text):
+    messages = [{"role": m["role"], "content": m["content"]} for m in st.session_state.messages]
+    messages.append({"role": "user", "content": text})
 
-
-# --------------------------
-# ✏️ Input Box
-# --------------------------
-input_text = st.text_input("Enter your English text:", key="input_msg")
-
-
-# --------------------------
-# 🧠 Translation Function (your logic unchanged)
-# --------------------------
-def translate_with_groq(question):
-    messages = [
-        {"role": "system", "content": "You are a helpful assistant that translates English to French."},
-        {"role": "user", "content": f"Question: {question}"},
-    ]
-
-    resp = client.chat.completions.create(
+    response = client.chat.completions.create(
         model="llama-3.1-8b-instant",
         messages=messages,
-        max_tokens=1024,
+        max_tokens=300
     )
 
-    # Same extraction logic
-    try:
-        return resp.choices[0].message["content"]
-    except:
-        try:
-            return resp.choices[0].text
-        except:
-            return str(resp)
+    return response.choices[0].message["content"]
 
+# ----------------------------
+# Handle user message
+# ----------------------------
+if user_input:
+    # Add user message
+    st.session_state.messages.append({"role": "user", "content": user_input})
 
-# --------------------------
-# 🟦 Output Section
-# --------------------------
-if input_text:
-    with st.spinner("Translating..."):
-        output = translate_with_groq(input_text)
+    # Get chatbot response
+    with st.spinner("Thinking..."):
+        bot_reply = chat_with_groq(user_input)
 
-    st.markdown("<div class='output-box'>", unsafe_allow_html=True)
-    st.markdown("### 🇫🇷 French Translation:")
-    st.write(output)
-    st.markdown("</div>", unsafe_allow_html=True)
+    # Add response to history
+    st.session_state.messages.append({"role": "assistant", "content": bot_reply})
 
+    # Rerun to update UI
+    st.experimental_rerun()
 
-# --------------------------
-# 📝 Footer
-# --------------------------
-st.markdown("<div class='footer'>Made with ❤️ using Groq + Llama + Streamlit</div>", unsafe_allow_html=True)
-
+# Footer
+st.markdown("<br><center style='color:#7a7a7a'>Made with ❤️ using Groq + Streamlit</center>", unsafe_allow_html=True)
