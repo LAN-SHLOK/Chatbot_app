@@ -53,8 +53,30 @@ st.markdown("""
         border-radius: 10px;
         padding: 10px;
     }
+    .app-title {
+        font-size: 45px;
+        font-weight: 900;
+        color: #00eaff;
+        text-align: center;
+        margin-top: 10px;
+        margin-bottom: 5px;
+        text-shadow: 0px 0px 25px rgba(0, 238, 255, 0.8);
+        font-family: 'Segoe UI', sans-serif;
+    }
+    .app-subtitle {
+        font-size: 18px;
+        font-weight: 400;
+        color: #cdd6f4;
+        text-align: center;
+        margin-top: -10px;
+        margin-bottom: 30px;
+        font-family: 'Segoe UI', sans-serif;
+    }
 </style>
+<div class="app-title">GEN AI ChatBot</div>
+<div class="app-subtitle">Powered by Llama 3.3 — Fast • Smart • Accurate</div>
 """, unsafe_allow_html=True)
+
 
 # -------------------------------------
 # Chat Memory (Limited to last 4 messages)
@@ -109,4 +131,5 @@ if user_input and st.session_state.get("last_input") != user_input:
     st.session_state.messages.append({"role": "assistant", "content": bot_reply})
 
     st.rerun()   # refresh UI BUT no re-generation
+
 
