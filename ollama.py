@@ -142,8 +142,9 @@ if user_input:
     st.session_state.messages.append({"role": "assistant", "content": bot_reply})
 
     # Rerun to update UI
-    st.experimental_rerun()
+    st.rerun()
 
 # Footer
 st.markdown("<br><center style='color:#7a7a7a'>Made with ❤️ using Groq + Streamlit</center>", unsafe_allow_html=True)
+
 
