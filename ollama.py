@@ -15,11 +15,7 @@ else:
 # -------------------------------------
 # Streamlit Page Setup
 # -------------------------------------
-st.set_page_config(
-    page_title="Simple GEN AI Chatbot",
-    layout="centered",
-    page_icon="🤖"
-)
+st.set_page_config(page_title="GEN AI Chatbot", layout="centered", page_icon="🤖")
 
 # -------------------------------------
 # UI Styling
@@ -29,21 +25,6 @@ st.markdown("""
     body {
         background: linear-gradient(135deg, #090a0f, #1f2633);
         color: white !important;
-    }
-    .title {
-        font-size: 42px;
-        font-weight: 900;
-        color: #00eaff;
-        text-align: center;
-        text-shadow: 0px 0px 20px rgba(0, 238, 255, 0.7);
-        margin-bottom: 5px;
-    }
-    .sub {
-        text-align: center;
-        font-size: 16px;
-        color: #d0d0d0;
-        margin-top: -10px;
-        margin-bottom: 25px;
     }
     .chat-box {
         background: #12151c;
@@ -57,14 +38,12 @@ st.markdown("""
         background: #1e2a38;
         padding: 10px;
         border-radius: 10px;
-        margin-bottom: 5px;
         color: #fff;
     }
     .bot {
         background: #0d1117;
         padding: 10px;
         border-radius: 10px;
-        margin-bottom: 5px;
         color: #00eaff;
         border-left: 3px solid #00eaff;
     }
@@ -78,18 +57,12 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # -------------------------------------
-# Title
-# -------------------------------------
-st.markdown("<div class='title'>Simple GEN AI CHATBOT</div>", unsafe_allow_html=True)
-st.markdown("<div class='sub'>Powered by Llama 3 — Smart, Fast, Free (Groq)</div>", unsafe_allow_html=True)
-
-# -------------------------------------
-# Chat History (Limited Memory)
+# Chat Memory (Limited to last 4 messages)
 # -------------------------------------
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Display chat history
+# Show chat history
 for m in st.session_state.messages:
     if m["role"] == "user":
         st.markdown(f"<div class='chat-box'><div class='user'>🙋‍♂️ {m['content']}</div></div>", unsafe_allow_html=True)
@@ -97,22 +70,21 @@ for m in st.session_state.messages:
         st.markdown(f"<div class='chat-box'><div class='bot'>🤖 {m['content']}</div></div>", unsafe_allow_html=True)
 
 # -------------------------------------
-# User Input
+# Input Box
 # -------------------------------------
 user_input = st.text_input("Type your message...")
 
 # -------------------------------------
-# Limited-memory chat function (BEST)
+# Chat Function
 # -------------------------------------
 def chat_with_groq(prompt):
-
     limited_memory = st.session_state.messages[-4:]
 
     messages = [{"role": m["role"], "content": m["content"]} for m in limited_memory]
     messages.append({"role": "user", "content": prompt})
 
     response = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",   # FINAL WORKING MODEL
+        model="llama-3.3-70b-versatile",
         messages=messages,
         max_tokens=300
     )
@@ -120,20 +92,21 @@ def chat_with_groq(prompt):
     return response.choices[0].message.content
 
 # -------------------------------------
-# Handle response
+# PROCESS USER MESSAGE ONLY WHEN ENTER PRESSED
 # -------------------------------------
-if user_input:
-    # Save user message
+if user_input and st.session_state.get("last_input") != user_input:
+
+    # store input so it doesn't repeat
+    st.session_state.last_input = user_input
+
+    # save user message
     st.session_state.messages.append({"role": "user", "content": user_input})
 
     with st.spinner("Thinking..."):
         bot_reply = chat_with_groq(user_input)
 
-    # Save bot reply
+    # save bot reply
     st.session_state.messages.append({"role": "assistant", "content": bot_reply})
 
-    st.rerun()
-
-# Footer
-st.markdown("<br><center style='color:#777'>Made with ❤️ using Groq + Streamlit</center>", unsafe_allow_html=True)
+    st.rerun()   # refresh UI BUT no re-generation
 
