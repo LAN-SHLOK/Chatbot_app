@@ -10,10 +10,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# langsmith tracking
-os.environ["LANGCHAIN_API_KEY"] = os.getenv("LANGCHAIN_API_KEY")
-os.environ["LANGCHAIN_TRACING_V2"] = "true"
-
 prompt=ChatPromptTemplate.from_messages(
     [
         ("system", "You are a helpful assistant that translates English to French."),
@@ -33,4 +29,5 @@ Output_parser=StrOutputParser()
 chain=prompt | llm | Output_parser  
 
 if input_text:
+
     st.write(chain.invoke({"question": input_text}))
