@@ -81,7 +81,7 @@ st.markdown("""
 # Title
 # -------------------------------------
 st.markdown("<div class='title'>Simple GEN AI CHATBOT</div>", unsafe_allow_html=True)
-st.markdown("<div class='sub'>Powered by Llama 3.1 — Smart, Fast, Free</div>", unsafe_allow_html=True)
+st.markdown("<div class='sub'>Powered by Llama 3 — Smart, Fast, Free (Groq)</div>", unsafe_allow_html=True)
 
 # -------------------------------------
 # Chat History (Limited Memory)
@@ -105,16 +105,15 @@ user_input = st.text_input("Type your message...")
 # Limited-memory chat function (BEST)
 # -------------------------------------
 def chat_with_groq(prompt):
-    
-    # KEEP ONLY LAST 4 MESSAGES
+
+    # Keep ONLY last 4 messages
     limited_memory = st.session_state.messages[-4:]
 
     messages = [{"role": m["role"], "content": m["content"]} for m in limited_memory]
     messages.append({"role": "user", "content": prompt})
 
     response = client.chat.completions.create(
-        model="mixtral-8x7b-32768",  # best for low rate limits
-        # model="llama-3.3-70b-versatile",  # best quality (optional)
+        model="llama3-70b-8192",  # CORRECT MODEL
         messages=messages,
         max_tokens=300
     )
@@ -134,7 +133,7 @@ if user_input:
     # Save bot reply
     st.session_state.messages.append({"role": "assistant", "content": bot_reply})
 
-    st.rerun()  # refresh chat window
+    st.rerun()
 
 # Footer
 st.markdown("<br><center style='color:#777'>Made with ❤️ using Groq + Streamlit</center>", unsafe_allow_html=True)
