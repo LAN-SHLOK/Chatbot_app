@@ -169,7 +169,6 @@ def chat_with_groq(prompt):
     limited_memory = st.session_state.messages[-4:]
 
     messages = [{"role": m["role"], "content": m["content"]} for m in limited_memory]
-    messages.append({"role": "user", "content": prompt})
 
     response = client.chat.completions.create(
         model="llama3-8b-8192",
