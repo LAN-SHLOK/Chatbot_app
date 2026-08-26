@@ -165,8 +165,11 @@ user_input = st.text_input("Type your message...")
 # -------------------------------------
 # Chat Function
 # -------------------------------------
-def chat_with_groq(prompt):
-    limited_memory = st.session_state.messages[-4:]
+def chat_with_groq():
+    # Keep the last 5 messages (2 full interactions + current prompt)
+    # This must be an odd number so the array always starts with a "user" message.
+    # Llama 3 models throw a 400 Bad Request if the first message is from the "assistant".
+    limited_memory = st.session_state.messages[-5:]
 
     messages = [{"role": m["role"], "content": m["content"]} for m in limited_memory]
 
@@ -190,7 +193,7 @@ if user_input and st.session_state.get("last_input") != user_input:
     st.session_state.messages.append({"role": "user", "content": user_input})
 
     with st.spinner("Thinking..."):
-        bot_reply = chat_with_groq(user_input)
+        bot_reply = chat_with_groq()
 
     # save bot reply
     st.session_state.messages.append({"role": "assistant", "content": bot_reply})
