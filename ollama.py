@@ -22,59 +22,84 @@ st.set_page_config(page_title="GEN AI Chatbot", layout="centered", page_icon="�
 # -------------------------------------
 st.markdown("""
 <style>
-    body {
-        background: linear-gradient(135deg, #090a0f, #1f2633);
-        color: white !important;
+    .stApp {
+        background-color: #f4f4f2;
     }
-    .chat-box {
-        background: #12151c;
-        padding: 15px;
-        border-radius: 15px;
-        border: 1px solid #00eaff60;
-        margin-bottom: 15px;
-        box-shadow: 0 0 20px rgba(0, 238, 255, 0.1);
+    
+    .chat-wrapper {
+        display: flex;
+        width: 100%;
+        margin-bottom: 20px;
     }
+    .user-wrapper {
+        justify-content: flex-end;
+    }
+    .bot-wrapper {
+        justify-content: flex-start;
+    }
+
     .user {
-        background: #1e2a38;
-        padding: 10px;
-        border-radius: 10px;
-        color: #fff;
+        background: #2c3e50;
+        padding: 15px 22px;
+        border-radius: 18px 18px 4px 18px;
+        color: #ffffff;
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        font-size: 16px;
+        line-height: 1.5;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+        max-width: 80%;
     }
     .bot {
-        background: #0d1117;
-        padding: 10px;
-        border-radius: 10px;
-        color: #00eaff;
-        border-left: 3px solid #00eaff;
+        background: #ffffff;
+        padding: 15px 22px;
+        border-radius: 18px 18px 18px 4px;
+        color: #2c3e50;
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        font-size: 16px;
+        line-height: 1.5;
+        border: 1px solid #e1e4e8;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+        max-width: 80%;
     }
+    
     .stTextInput>div>div>input {
-        background: #1b1f29;
-        color: white;
+        background: #ffffff;
+        color: #333333;
+        border: 1px solid #d1d5da;
         border-radius: 10px;
-        padding: 10px;
+        padding: 12px 15px;
+        font-size: 16px;
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
     }
+    .stTextInput>div>div>input:focus {
+        border-color: #2c3e50;
+        box-shadow: 0 0 0 2px rgba(44, 62, 80, 0.2);
+    }
+
     .app-title {
-        font-size: 45px;
-        font-weight: 900;
-        color: #00eaff;
+        font-size: 42px;
+        font-weight: normal;
+        color: #1a252f;
         text-align: center;
-        margin-top: 10px;
+        margin-top: 20px;
         margin-bottom: 5px;
-        text-shadow: 0px 0px 25px rgba(0, 238, 255, 0.8);
-        font-family: 'Segoe UI', sans-serif;
+        font-family: 'Garamond', 'Georgia', serif;
+        letter-spacing: -0.5px;
     }
     .app-subtitle {
-        font-size: 18px;
-        font-weight: 400;
-        color: #cdd6f4;
+        font-size: 14px;
+        font-weight: 500;
+        color: #7f8c8d;
         text-align: center;
-        margin-top: -10px;
-        margin-bottom: 30px;
-        font-family: 'Segoe UI', sans-serif;
+        margin-top: 0px;
+        margin-bottom: 40px;
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
     }
 </style>
-<div class="app-title">GEN AI ChatBot</div>
-<div class="app-subtitle">Powered by Llama 3.3 — Fast • Smart • Accurate</div>
+<div class="app-title">Gen AI ChatBot</div>
+<div class="app-subtitle">Powered by Llama • Fast • Smart</div>
 """, unsafe_allow_html=True)
 
 
@@ -87,9 +112,9 @@ if "messages" not in st.session_state:
 # Show chat history
 for m in st.session_state.messages:
     if m["role"] == "user":
-        st.markdown(f"<div class='chat-box'><div class='user'>🙋‍♂️ {m['content']}</div></div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='chat-wrapper user-wrapper'><div class='user'>🙋‍♂️ {m['content']}</div></div>", unsafe_allow_html=True)
     else:
-        st.markdown(f"<div class='chat-box'><div class='bot'>🤖 {m['content']}</div></div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='chat-wrapper bot-wrapper'><div class='bot'>🤖 {m['content']}</div></div>", unsafe_allow_html=True)
 
 # -------------------------------------
 # Input Box
@@ -106,7 +131,7 @@ def chat_with_groq(prompt):
     messages.append({"role": "user", "content": prompt})
 
     response = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
+        model="llama-3.1-8b-instant",
         messages=messages,
         max_tokens=300
     )
