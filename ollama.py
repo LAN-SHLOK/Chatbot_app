@@ -5,7 +5,10 @@ import os
 # -------------------------------------
 # Load API Key
 # -------------------------------------
-GROQ_API_KEY = st.secrets.get("GROQ_API_KEY", "")
+try:
+    GROQ_API_KEY = st.secrets.get("GROQ_API_KEY", "")
+except Exception:
+    GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "")
 
 if not GROQ_API_KEY:
     st.error("❌ Missing GROQ_API_KEY in Streamlit Secrets")
@@ -174,7 +177,7 @@ def chat_with_groq():
     messages = [{"role": m["role"], "content": m["content"]} for m in limited_memory]
 
     response = client.chat.completions.create(
-        model="llama3-8b-8192",
+        model="openai/gpt-oss-20b",
         messages=messages,
         max_tokens=300
     )
